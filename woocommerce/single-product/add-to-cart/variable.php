@@ -26,14 +26,13 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						<td class="label"><label for="<?php echo sanitize_title( $attribute_name ); ?>"><?php echo wc_attribute_label( $attribute_name ); ?></label></td>
 						<td class="value"><fieldset>
 						<?php
-						$selected = isset( $_REQUEST[ 'attribute_' . sanitize_title( $attribute_name ) ] ) ? wc_clean( $_REQUEST[ 'attribute_' . sanitize_title( $attribute_name ) ] ) : $product->get_variation_default_attribute( $attribute_name );
-						?>
-						<strong><?php echo wc_attribute_label( $name ); ?></strong><br />
-						<?php
-
 						$attribute = $attribute_name;
 						$name      = 'attribute_' . sanitize_title( $attribute );
 						$id        = sanitize_title( $attribute );
+						$selected = isset( $_REQUEST[ 'attribute_' . sanitize_title( $attribute_name ) ] ) ? wc_clean( $_REQUEST[ 'attribute_' . sanitize_title( $attribute_name ) ] ) : $product->get_variation_default_attribute( $attribute_name );
+						?>
+						<?php
+
 
 						if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
 							$attributes = $product->get_variation_attributes();
@@ -45,9 +44,12 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						if ( $product && taxonomy_exists( $attribute ) ) {
 							// Get terms if this is a taxonomy - ordered. We need the names too.
 							$terms = wc_get_product_terms( $product->id, $attribute, array( 'fields' => 'all' ) );
-							foreach ( $terms as $term ) {
+							$terms = array_reverse($terms);
+							if (!$selected) $selected = $terms[0]->slug;
+							foreach ( $terms as $index => $term ) {
 								if ( in_array( $term->slug, $options ) ) {
-									echo '<div class="wvdrb-one-third"><input type="radio" value="' . esc_attr( $term->slug ) . '" ' . checked( sanitize_title( $selected ), $term->slug, false ) . ' id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">  &nbsp; &nbsp; ' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</div><div class="wvdrb-two-thirds"><pre>' . $term->description . '</pre></div><br />';
+									echo '<div class=""><input type="radio" value="' . esc_attr( $term->slug ) . '" ' . checked( sanitize_title( $selected ), $term->slug, false ) . ' id="' . esc_attr( $id ). $index . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '"><label for="'. esc_attr( $id ). $index .'">  &nbsp; &nbsp; ' . apply_filters( 'woocommerce_variation_option_name', $term->name ) . '</label></div>';
+									//echo '<div class=""><pre>' . $selected . '</pre></div><br />';
 								}
 							}
 						} else {
@@ -62,7 +64,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 								$selected = sanitize_title( $selected ) === $selected ? checked( $selected, sanitize_title( $option ), false ) : checked( $selected, $option, false );
 
-								echo '<div class="wvdrb-one-third"><input type="radio" value="' . esc_attr( $option ) . '" ' . $selected . ' id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">  &nbsp; &nbsp; ' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</div><div class="wvdrb-two-thirds">' . $var_description . '</div><br />';
+								echo '<div class=""><input type="radio" value="' . esc_attr( $option ) . '" ' . $selected . ' id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">  &nbsp; &nbsp; ' . esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ) . '</div>'; //<div class="wvdrb-two-thirds">' . $var_description . '</div><br />';
 							}
 						}
 					} ?>
